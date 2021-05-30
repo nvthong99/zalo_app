@@ -1,7 +1,7 @@
 import axios from 'axios';
 import camelCase from 'camelcase-keys';
 
-const REACT_APP_API_DOMAIN_DEV = 'http://d24d76d25e81.ngrok.io';
+const REACT_APP_API_DOMAIN_DEV = 'http://b252e0d7adb7.ngrok.io';
 const REACT_APP_API_DOMAIN = 'http://127.0.0.1:3000';
 export default axios.create({
   baseURL: `${REACT_APP_API_DOMAIN_DEV}/api/v1`,

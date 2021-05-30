@@ -1,18 +1,38 @@
 import * as React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import Ionicons from '@expo/vector-icons/Ionicons';
-import COLORS from '../constants/colors';
+import { createStackNavigator } from '@react-navigation/stack';
 import { Text } from 'react-native';
 
-import DiaryScreen from '../containers/Diary';
+import PostScreen from '../containers/Post';
+import CreatePost from '../containers/Post/CreatePost';
 import MessageScreen from '../containers/Message';
 import ContactScreen from '../containers/Contact';
 import InformationScreen from '../containers/Information';
 import CallApiScreen from '../containers/CallApi';
 
+const PostStack = createStackNavigator();
+
+const PostStackScreen = () => {
+  return (
+    <PostStack.Navigator>
+      <PostStack.Screen
+        name="Diary"
+        options={{ headerShown: false }}
+        component={PostScreen}
+      />
+      <PostStack.Screen
+        name="CreatePost"
+        options={{ headerShown: false }}
+        component={CreatePost}
+      />
+    </PostStack.Navigator>
+  );
+};
+
 const Tab = createBottomTabNavigator();
 
-const DiaryStackScreen = () => {
+const HomeStackScreen = () => {
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
@@ -20,7 +40,7 @@ const DiaryStackScreen = () => {
           let iconName;
 
           switch (route.name) {
-            case 'Diary':
+            case 'Post':
               iconName = focused ? 'time' : 'time-outline';
               break;
             case 'Message':
@@ -46,7 +66,7 @@ const DiaryStackScreen = () => {
         tabBarLabel: ({ focused, color }) => {
           let name;
           switch (route.name) {
-            case 'Diary':
+            case 'Post':
               name = focused ? 'Nhật ký' : null;
               break;
             case 'Message':
@@ -86,10 +106,10 @@ const DiaryStackScreen = () => {
       <Tab.Screen name="Message" component={MessageScreen} />
       <Tab.Screen name="Contact" component={ContactScreen} />
       <Tab.Screen name="CallApi" component={CallApiScreen} />
-      <Tab.Screen name="Diary" component={DiaryScreen} />
+      <Tab.Screen name="Post" component={PostStackScreen} />
       <Tab.Screen name="More" component={InformationScreen} />
     </Tab.Navigator>
   );
 };
 
-export default DiaryStackScreen;
+export default HomeStackScreen;
