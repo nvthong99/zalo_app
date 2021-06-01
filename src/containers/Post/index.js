@@ -1,22 +1,26 @@
-import React, { useEffect, useState } from 'react';
-import {
-  View,
-  Text,
-  TextInput,
-  Image,
-  ScrollView,
-  TouchableOpacity,
-} from 'react-native';
+import React, { useEffect, useState, useRef } from 'react';
+import { View, Text, Image, ScrollView, TouchableOpacity } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import apis from '../../apis';
 import moment from 'moment';
 import { useSelector } from 'react-redux';
+import styles from './index.style';
+import RBSheet from 'react-native-raw-bottom-sheet';
+import Comment from './Comment';
+import Report from './Report';
 
 const limitBreakLine = 2;
 const Diary = ({ navigation }) => {
+  const refRBSheet = useRef();
+  const [rbSheetInfo, setRBSheetInfo] = useState({
+    height: 0,
+    component: null,
+  });
   const { user } = useSelector((state) => state.auth);
+
   const [posts, setPosts] = useState([]);
   const [listSeeMore, setListSeeMore] = useState([]);
+
   const handleOpenCreatePost = () => {
     navigation.navigate('CreatePost');
   };
@@ -73,11 +77,10 @@ const Diary = ({ navigation }) => {
   };
   const renderText = (id, text, status) => {
     if (text.trim()) {
-      numberOfLineBreaks = (text.match(/\n/g) || []).length;
+      const numberOfLineBreaks = (text.match(/\n/g) || []).length;
       if (numberOfLineBreaks < limitBreakLine) {
         return <Text style={{ fontSize: 20 }}>{text}</Text>;
       }
-      console.log(status);
       if (status) {
         return (
           <View>
@@ -94,7 +97,7 @@ const Diary = ({ navigation }) => {
         .split('\n')
         .slice(0, limitBreakLine)
         .reduce((str, i) => str + i + '\n', '');
-      console.log(newText);
+
       return (
         <View>
           <Text style={{ fontSize: 20 }}>
@@ -110,77 +113,41 @@ const Diary = ({ navigation }) => {
     }
     return <Text style={{ fontSize: 20 }}></Text>;
   };
+
+  const handleOpenRBSheet = ({ height = 100, component }) => {
+    setRBSheetInfo({
+      height,
+      component,
+    });
+    refRBSheet.current.open();
+  };
+
+  const handleCloseRBSheet = () => {
+    refRBSheet.current.close();
+  };
+
+  const handleOpenMore = (id) => {
+    handleOpenRBSheet({
+      height: 500,
+      component: (
+        <Comment postId={id} handleCloseRBSheet={handleCloseRBSheet} />
+      ),
+    });
+  };
+  const handleOpenComment = (id) => {
+    handleOpenRBSheet({
+      height: 80,
+      component: <Report postId={id} handleCloseRBSheet={handleCloseRBSheet} />,
+    });
+  };
+
   return (
     <View style={{ backgroundColor: '#eee' }}>
-      <View
-        style={{
-          height: 25,
-          backgroundColor: '#0091ff',
-        }}
-      />
-
-      <View
-        style={{
-          display: 'flex',
-          flexDirection: 'row',
-          backgroundColor: '#53abfb',
-          color: '#fff',
-          padding: 15,
-        }}
-      >
-        <Ionicons
-          name="search-outline"
-          style={{
-            fontSize: 25,
-            color: '#fff',
-            marginRight: 20,
-          }}
-        />
-        <TextInput
-          style={{
-            flexGrow: 1,
-            color: '#fff',
-            fontSize: 18,
-          }}
-          placeholderTextColor="#fff"
-          editable
-          placeholder="Tìm bạn bè, tin nhắn ..."
-        />
-        <Ionicons
-          style={{
-            paddingLeft: 20,
-            fontSize: 25,
-            color: '#fff',
-            marginRight: 20,
-          }}
-          name="image-outline"
-        />
-        <Ionicons
-          style={{
-            fontSize: 25,
-            color: '#fff',
-          }}
-          name="notifications-outline"
-        />
-      </View>
       <ScrollView style={{ marginBottom: 80 }}>
         <View style={{ marginTop: 12 }}>
-          <View
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              flexDirection: 'row',
-              padding: 15,
-              backgroundColor: '#fff',
-            }}
-          >
+          <View style={styles.boxFeel}>
             <Image
-              style={{
-                width: 60,
-                height: 60,
-                borderRadius: 50,
-                marginRight: 20,
-              }}
+              style={styles.avatar}
               source={{
                 uri: user.avatar,
               }}
@@ -202,15 +169,6 @@ const Diary = ({ navigation }) => {
               </Text>
             </TouchableOpacity>
           </View>
-          {/* <View
-          style={{
-            marginRight: 15,
-            marginBottom: 15,
-            marginLeft: 15,
-            height: 1,
-            backgroundColor: '#ccc',
-          }}
-        /> */}
         </View>
         {posts.map((el) => {
           const reactStatus = checkUserInReactPoss(el);
@@ -222,21 +180,9 @@ const Diary = ({ navigation }) => {
                 marginTop: 12,
               }}
             >
-              <View
-                style={{
-                  display: 'flex',
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  padding: 15,
-                }}
-              >
+              <View style={styles.headerPost}>
                 <Image
-                  style={{
-                    width: 50,
-                    height: 50,
-                    borderRadius: 50,
-                    marginRight: 20,
-                  }}
+                  style={styles.headerAvatarAuthor}
                   source={{
                     uri: el.author && el.author.avatar,
                   }}
@@ -250,10 +196,15 @@ const Diary = ({ navigation }) => {
                   </Text>
                 </View>
                 <View>
-                  <Ionicons
-                    style={{ fontSize: 25, color: '#ccc' }}
-                    name="ellipsis-horizontal"
-                  />
+                  <TouchableOpacity
+                    activeOpacity={0.8}
+                    onPress={() => handleOpenMore(el.id)}
+                  >
+                    <Ionicons
+                      style={{ fontSize: 25, color: '#ccc' }}
+                      name="ellipsis-horizontal"
+                    />
+                  </TouchableOpacity>
                 </View>
               </View>
               <View
@@ -269,37 +220,14 @@ const Diary = ({ navigation }) => {
                       width: '100%',
                     }}
                     source={{
-                      uri:
-                        (el.content.media && el.content.media.url) ||
-                        'https://jssors8.azureedge.net/demos/image-slider/img/faded-monaco-scenery-evening-dark-picjumbo-com-image.jpg',
+                      uri: el.content.media && el.content.media.url,
                     }}
                   />
                 </View>
               )}
-              <View
-                style={{
-                  padding: 15,
-                  display: 'flex',
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                }}
-              >
-                <View
-                  style={{
-                    display: 'flex',
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                  }}
-                >
-                  <View
-                    style={{
-                      display: 'flex',
-                      flexDirection: 'row',
-                      alignItems: 'center',
-                      marginRight: 30,
-                    }}
-                  >
+              <View style={styles.actionPostContainer}>
+                <View style={styles.actionPost}>
+                  <View style={styles.reactPost}>
                     <TouchableOpacity
                       activeOpacity={0.8}
                       onPress={() => {
@@ -321,78 +249,40 @@ const Diary = ({ navigation }) => {
                     </Text>
                   </View>
 
-                  <View
-                    style={{
-                      display: 'flex',
-                      flexDirection: 'row',
-                      alignItems: 'center',
-                    }}
-                  >
+                  <View style={styles.actionPost}>
                     <TouchableOpacity
                       activeOpacity={0.8}
-                      onPress={() => {
-                        const reactFind =
-                          el.reacts &&
-                          el.reacts.find((ele) => ele.user === user.id);
-                        if (reactFind) handleReactPost(el.id);
-                        else handleUnReactPost(el.id);
-                      }}
+                      onPress={() => handleOpenComment(el.id)}
                     >
                       <Ionicons
-                        style={{
-                          fontSize: 25,
-                          color: '#ccc',
-                          marginRight: 5,
-                        }}
+                        style={styles.commentIcon}
                         name="chatbox-ellipses-outline"
                       />
                     </TouchableOpacity>
                     <Text style={{ fontSize: 20 }}>30</Text>
                   </View>
                 </View>
-                {/* <View
-                style={{
-                  display: 'flex',
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                }}
-              >
-                <Text style={{ fontSize: 15, color: '#ccc', marginRight: 5 }}>
-                  Thích bởi
-                </Text>
-                <Image
-                  style={{
-                    width: 25,
-                    height: 25,
-                    borderRadius: 25,
-                  }}
-                  source={{
-                    uri: 'https://jssors8.azureedge.net/demos/image-slider/img/faded-monaco-scenery-evening-dark-picjumbo-com-image.jpg',
-                  }}
-                />
-                <View
-                  style={{
-                    width: 25,
-                    height: 25,
-                    borderRadius: 25,
-                    backgroundColor: '#ccc',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    position: 'relative',
-                    left: -5,
-                    borderWidth: 1,
-                    borderColor: '#fff',
-                  }}
-                >
-                  <Text style={{ fontSize: 10 }}>+10</Text>
-                </View>
-              </View> */}
               </View>
             </View>
           );
         })}
       </ScrollView>
+      <RBSheet
+        ref={refRBSheet}
+        closeOnDragDown={true}
+        closeOnPressMask={true}
+        height={rbSheetInfo.height}
+        customStyles={{
+          wrapper: {
+            backgroundColor: 'transparent',
+          },
+          draggableIcon: {
+            backgroundColor: '#000',
+          },
+        }}
+      >
+        {rbSheetInfo.component}
+      </RBSheet>
     </View>
   );
 };
