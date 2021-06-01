@@ -37,6 +37,8 @@ export default StyleSheet.create({
     alignItems: 'center',
     borderTopWidth: 1,
     borderTopColor: '#ccc',
+    backgroundColor: '#fff',
+    padding: 5,
   },
   commenterName: {
     fontSize: 15,

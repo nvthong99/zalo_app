@@ -1,23 +1,27 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useDebugValue } from 'react';
 import { View, Text, Image, ScrollView, TouchableOpacity } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import apis from '../../apis';
 import moment from 'moment';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import styles from './index.style';
 import RBSheet from 'react-native-raw-bottom-sheet';
 import Comment from './Comment';
 import Report from './Report';
+import io from 'socket.io-client';
+import actions from '../../redux/actions';
 
 const limitBreakLine = 2;
 const Diary = ({ navigation }) => {
   const refRBSheet = useRef();
+  const dispatch = useDispatch();
   const [rbSheetInfo, setRBSheetInfo] = useState({
     height: 0,
     component: null,
   });
-  const { user } = useSelector((state) => state.auth);
 
+  const { user } = useSelector((state) => state.auth);
+  const { socket } = useSelector((state) => state.socket);
   const [posts, setPosts] = useState([]);
   const [listSeeMore, setListSeeMore] = useState([]);
 
@@ -115,12 +119,16 @@ const Diary = ({ navigation }) => {
   };
 
   const handleOpenRBSheet = ({ height = 100, component }) => {
+    console.log(height);
     setRBSheetInfo({
       height,
       component,
     });
-    refRBSheet.current.open();
   };
+
+  useEffect(() => {
+    refRBSheet.current.open();
+  }, [rbSheetInfo]);
 
   const handleCloseRBSheet = () => {
     refRBSheet.current.close();
@@ -128,17 +136,12 @@ const Diary = ({ navigation }) => {
 
   const handleOpenMore = (id) => {
     handleOpenRBSheet({
-      height: 500,
-      component: (
-        <Comment postId={id} handleCloseRBSheet={handleCloseRBSheet} />
-      ),
-    });
-  };
-  const handleOpenComment = (id) => {
-    handleOpenRBSheet({
       height: 80,
       component: <Report postId={id} handleCloseRBSheet={handleCloseRBSheet} />,
     });
+  };
+  const handleOpenComment = (id) => {
+    navigation.navigate('Comment', { postId: id });
   };
 
   return (
@@ -259,7 +262,7 @@ const Diary = ({ navigation }) => {
                         name="chatbox-ellipses-outline"
                       />
                     </TouchableOpacity>
-                    <Text style={{ fontSize: 20 }}>30</Text>
+                    <Text style={{ fontSize: 20 }}>{el.comments.length}</Text>
                   </View>
                 </View>
               </View>

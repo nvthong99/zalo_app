@@ -10,6 +10,7 @@ import MessageScreen from '../containers/Message';
 import ContactScreen from '../containers/Contact';
 import InformationScreen from '../containers/Information';
 import CallApiScreen from '../containers/CallApi';
+import CommentScreen from '../containers/Post/Comment';
 
 const PostStack = createStackNavigator();
 
@@ -25,6 +26,11 @@ const PostStackScreen = () => {
         name="CreatePost"
         options={{ headerShown: false }}
         component={CreatePost}
+      />
+      <PostStack.Screen
+        name="Comment"
+        options={{ headerShown: false }}
+        component={CommentScreen}
       />
     </PostStack.Navigator>
   );

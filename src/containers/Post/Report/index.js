@@ -31,7 +31,6 @@ const Report = ({ postId, handleCloseRBSheet }) => {
       <TouchableOpacity
         activeOpacity={0.8}
         onPress={() => {
-          refRBSheet.current.close();
           setOpenModal(true);
         }}
         style={{
