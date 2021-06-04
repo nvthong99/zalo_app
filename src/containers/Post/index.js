@@ -1,15 +1,25 @@
-import React, { useEffect, useState, useRef, useDebugValue } from 'react';
-import { View, Text, Image, ScrollView, TouchableOpacity } from 'react-native';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
+import {
+  View,
+  Text,
+  Image,
+  ScrollView,
+  TouchableOpacity,
+  RefreshControl,
+} from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import apis from '../../apis';
 import moment from 'moment';
 import { useDispatch, useSelector } from 'react-redux';
 import styles from './index.style';
 import RBSheet from 'react-native-raw-bottom-sheet';
-import Comment from './Comment';
 import Report from './Report';
-import io from 'socket.io-client';
-import actions from '../../redux/actions';
+import Header from '../../components/Header';
+import { getCookie, setCookie } from '../../utils/cookie';
+
+const wait = (timeout) => {
+  return new Promise((resolve) => setTimeout(resolve, timeout));
+};
 
 const limitBreakLine = 2;
 const Diary = ({ navigation }) => {
@@ -24,6 +34,7 @@ const Diary = ({ navigation }) => {
   const { socket } = useSelector((state) => state.socket);
   const [posts, setPosts] = useState([]);
   const [listSeeMore, setListSeeMore] = useState([]);
+  const [refreshing, setRefreshing] = useState(false);
 
   const handleOpenCreatePost = () => {
     navigation.navigate('CreatePost');
@@ -33,13 +44,26 @@ const Diary = ({ navigation }) => {
     const { data } = await apis.post.getPosts();
     if (data && data.status) {
       setPosts(data.result.data);
+      setCookie('posts', JSON.stringify([...data.result.data]));
     } else {
       alert('fetch data failed');
     }
+    setRefreshing(false);
+  };
+
+  const fetchPostsFromCache = async () => {
+    const listPost = await getCookie('posts');
+    if (listPost) setPosts([...JSON.parse(listPost)]);
   };
 
   useEffect(() => {
+    fetchPostsFromCache();
     fetchPosts();
+  }, []);
+
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await fetchPosts();
   }, []);
 
   const handleReactPost = async (id) => {
@@ -146,7 +170,13 @@ const Diary = ({ navigation }) => {
 
   return (
     <View style={{ backgroundColor: '#eee' }}>
-      <ScrollView style={{ marginBottom: 80 }}>
+      <Header navigation={navigation} />
+      <ScrollView
+        style={{ marginBottom: 80 }}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
+      >
         <View style={{ marginTop: 12 }}>
           <View style={styles.boxFeel}>
             <Image
@@ -184,12 +214,20 @@ const Diary = ({ navigation }) => {
               }}
             >
               <View style={styles.headerPost}>
-                <Image
-                  style={styles.headerAvatarAuthor}
-                  source={{
-                    uri: el.author && el.author.avatar,
+                <TouchableOpacity
+                  activeOpacity={0.8}
+                  onPress={() => {
+                    navigation.navigate('Personal', { userId: el.author.id });
                   }}
-                />
+                >
+                  <Image
+                    style={styles.headerAvatarAuthor}
+                    source={{
+                      uri: el.author && el.author.avatar,
+                    }}
+                  />
+                </TouchableOpacity>
+
                 <View style={{ flexGrow: 1 }}>
                   <Text style={{ fontSize: 18, marginBottom: 5 }}>
                     {el.author.name}

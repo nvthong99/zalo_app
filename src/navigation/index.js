@@ -3,12 +3,37 @@ import { useDispatch, useSelector } from 'react-redux';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { getCookie } from '../utils/cookie';
-import { Text } from 'react-native';
+import { Text, View } from 'react-native';
 import actions from '../redux/actions';
 
 import HomeStackScreen from './HomeStackScreen';
 import AuthStackScreen from './AuthStackScreen';
+import PersonalScreen from '../containers/Personal';
+import SearchFriendScreen from '../containers/SearchFriend';
 
+const PrivateStack = createStackNavigator();
+
+const PrivateScreenStack = () => {
+  return (
+    <PrivateStack.Navigator>
+      <PrivateStack.Screen
+        name="Home"
+        component={HomeStackScreen}
+        options={{ headerShown: false }}
+      />
+      <PrivateStack.Screen
+        name="Personal"
+        component={PersonalScreen}
+        options={{ headerShown: false }}
+      />
+      <PrivateStack.Screen
+        name="SearchFriend"
+        component={SearchFriendScreen}
+        options={{ headerShown: false }}
+      />
+    </PrivateStack.Navigator>
+  );
+};
 const RootStack = createStackNavigator();
 
 const Navigators = () => {
@@ -41,8 +66,8 @@ const Navigators = () => {
       <RootStack.Navigator headerMode="none">
         {accessToken ? (
           <RootStack.Screen
-            name="App"
-            component={HomeStackScreen}
+            name="Private"
+            component={PrivateScreenStack}
             options={{
               animationEnabled: false,
             }}

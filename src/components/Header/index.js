@@ -1,8 +1,8 @@
 import React from 'react';
-import { View, Text } from 'react-native';
+import { View, Text, TouchableOpacity } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 
-const Header = () => {
+const Header = ({ navigation }) => {
   return (
     <>
       <View
@@ -29,16 +29,22 @@ const Header = () => {
             marginRight: 20,
           }}
         />
-        <TextInput
-          style={{
-            flexGrow: 1,
-            color: '#fff',
-            fontSize: 18,
+        <TouchableOpacity
+          style={{ flexGrow: 1 }}
+          onPress={() => {
+            navigation.navigate('SearchFriend');
           }}
-          placeholderTextColor="#fff"
-          editable
-          placeholder="Tìm bạn bè, tin nhắn ..."
-        />
+        >
+          <Text
+            style={{
+              color: '#fff',
+              fontSize: 18,
+            }}
+          >
+            Tìm bạn bè, tin nhắn ...
+          </Text>
+        </TouchableOpacity>
+
         <Ionicons
           style={{
             paddingLeft: 20,

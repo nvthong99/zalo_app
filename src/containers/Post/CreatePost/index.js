@@ -71,6 +71,10 @@ const CreatePost = ({ navigation }) => {
     }
   };
 
+  const handleBack = () => {
+    navigation.navigate('Diary');
+  };
+
   return (
     <View
       style={{
@@ -90,12 +94,14 @@ const CreatePost = ({ navigation }) => {
           backgroundColor: '#ccc',
         }}
       >
-        <Ionicons
-          name="arrow-back"
-          style={{
-            fontSize: 30,
-          }}
-        />
+        <TouchableOpacity onPress={handleBack}>
+          <Ionicons
+            name="arrow-back"
+            style={{
+              fontSize: 30,
+            }}
+          />
+        </TouchableOpacity>
         <TouchableOpacity onPress={handlePost}>
           <Text
             style={{
