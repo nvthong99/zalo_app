@@ -20,9 +20,13 @@ export default StyleSheet.create({
     justifyContent: 'center',
   },
   commenterName: {
-    fontSize: 15,
-    fontWeight: 'bold',
+    fontSize: 20,
     color: '#000',
+    marginRight: 10,
+  },
+  msg: {
+    fontSize: 15,
+    color: '#ccc',
     marginRight: 10,
   },
 });

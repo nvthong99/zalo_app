@@ -6,6 +6,8 @@ import {
   ScrollView,
   TouchableOpacity,
   RefreshControl,
+  StyleSheet,
+  WebView,
 } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import apis from '../../apis';
@@ -16,10 +18,8 @@ import RBSheet from 'react-native-raw-bottom-sheet';
 import Report from './Report';
 import Header from '../../components/Header';
 import { getCookie, setCookie } from '../../utils/cookie';
-
-const wait = (timeout) => {
-  return new Promise((resolve) => setTimeout(resolve, timeout));
-};
+import { urlify } from '../../utils/string';
+import RenderHtml from 'react-native-render-html';
 
 const limitBreakLine = 2;
 const Diary = ({ navigation }) => {
@@ -106,12 +106,12 @@ const Diary = ({ navigation }) => {
     if (text.trim()) {
       const numberOfLineBreaks = (text.match(/\n/g) || []).length;
       if (numberOfLineBreaks < limitBreakLine) {
-        return <Text style={{ fontSize: 20 }}>{text}</Text>;
+        return <RenderHtml source={{ html: urlify(text) }} />;
       }
       if (status) {
         return (
           <View>
-            <Text style={{ fontSize: 20 }}>{text}</Text>
+            <RenderHtml source={{ html: urlify(text) }} />
             <TouchableOpacity
               onPress={() => handleStatusDisplayPost(id, !status)}
             >
@@ -127,9 +127,9 @@ const Diary = ({ navigation }) => {
 
       return (
         <View>
-          <Text style={{ fontSize: 20 }}>
-            {newText.slice(0, newText.length - 1)}
-          </Text>
+          <RenderHtml
+            source={{ html: urlify(newText.slice(0, newText.length - 1)) }}
+          />
           <TouchableOpacity
             onPress={() => handleStatusDisplayPost(id, !status)}
           >
@@ -168,10 +168,9 @@ const Diary = ({ navigation }) => {
   };
 
   return (
-    <View style={{ backgroundColor: '#eee' }}>
+    <View>
       <Header navigation={navigation} />
       <ScrollView
-        style={{ marginVertical: 20 }}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
@@ -202,110 +201,116 @@ const Diary = ({ navigation }) => {
             </TouchableOpacity>
           </View>
         </View>
-        {posts.map((el) => {
-          const reactStatus = checkUserInReactPoss(el);
-          return (
-            <View
-              key={el.id}
-              style={{
-                backgroundColor: '#fff',
-                marginTop: 12,
-              }}
-            >
-              <View style={styles.headerPost}>
-                <TouchableOpacity
-                  activeOpacity={0.8}
-                  onPress={() => {
-                    navigation.navigate('Personal', { userId: el.author.id });
-                  }}
-                >
-                  <Image
-                    style={styles.headerAvatarAuthor}
-                    source={{
-                      uri: el.author && el.author.avatar,
-                    }}
-                  />
-                </TouchableOpacity>
-
-                <View style={{ flexGrow: 1 }}>
-                  <Text style={{ fontSize: 18, marginBottom: 5 }}>
-                    {el.author.name}
-                  </Text>
-                  <Text style={{ fontSize: 15, color: '#ccc' }}>
-                    {moment(el.createdAt).format('LLL')}
-                  </Text>
-                </View>
-                <View>
+        <ScrollView>
+          {posts.map((el) => {
+            const reactStatus = checkUserInReactPoss(el);
+            return (
+              <View
+                key={el.id}
+                style={{
+                  backgroundColor: '#fff',
+                  marginTop: 12,
+                }}
+              >
+                <View style={styles.headerPost}>
                   <TouchableOpacity
                     activeOpacity={0.8}
-                    onPress={() => handleOpenMore(el.id)}
+                    onPress={() => {
+                      navigation.navigate('Personal', { userId: el.author.id });
+                    }}
                   >
-                    <Ionicons
-                      style={{ fontSize: 25, color: '#ccc' }}
-                      name="ellipsis-horizontal"
+                    <Image
+                      style={styles.headerAvatarAuthor}
+                      source={{
+                        uri: el.author && el.author.avatar,
+                      }}
                     />
                   </TouchableOpacity>
-                </View>
-              </View>
-              <View
-                style={{ paddingRight: 15, paddingLeft: 15, paddingBottom: 15 }}
-              >
-                {renderText(el.id, el.content.text, listSeeMore[el.id])}
-              </View>
-              {el.content.media && el.content.media.url && (
-                <View>
-                  <Image
-                    style={{
-                      height: 300,
-                      width: '100%',
-                    }}
-                    source={{
-                      uri: el.content.media && el.content.media.url,
-                    }}
-                  />
-                </View>
-              )}
-              <View style={styles.actionPostContainer}>
-                <View style={styles.actionPost}>
-                  <View style={styles.reactPost}>
-                    <TouchableOpacity
-                      activeOpacity={0.8}
-                      onPress={() => {
-                        if (reactStatus < 0) handleReactPost(el.id);
-                        else handleUnReactPost(el.id, reactStatus);
-                      }}
-                    >
-                      <Ionicons
-                        style={{
-                          fontSize: 25,
-                          color: reactStatus >= 0 ? 'red' : '#ccc',
-                          marginRight: 5,
-                        }}
-                        name={reactStatus >= 0 ? 'heart' : 'heart-outline'}
-                      />
-                    </TouchableOpacity>
-                    <Text style={{ fontSize: 20 }}>
-                      {(el.reacts && el.reacts.length) || 0}
+
+                  <View style={{ flexGrow: 1 }}>
+                    <Text style={{ fontSize: 18, marginBottom: 5 }}>
+                      {el.author.name}
+                    </Text>
+                    <Text style={{ fontSize: 15, color: '#ccc' }}>
+                      {moment(el.createdAt).format('LLL')}
                     </Text>
                   </View>
-
-                  <View style={styles.actionPost}>
+                  <View>
                     <TouchableOpacity
                       activeOpacity={0.8}
-                      onPress={() => handleOpenComment(el.id)}
+                      onPress={() => handleOpenMore(el.id)}
                     >
                       <Ionicons
-                        style={styles.commentIcon}
-                        name="chatbox-ellipses-outline"
+                        style={{ fontSize: 25, color: '#ccc' }}
+                        name="ellipsis-horizontal"
                       />
                     </TouchableOpacity>
-                    <Text style={{ fontSize: 20 }}>{el.comments.length}</Text>
+                  </View>
+                </View>
+                <View
+                  style={{
+                    paddingRight: 15,
+                    paddingLeft: 15,
+                    paddingBottom: 15,
+                  }}
+                >
+                  {renderText(el.id, el.content.text, listSeeMore[el.id])}
+                </View>
+                {el.content.media && el.content.media.url && (
+                  <View>
+                    <Image
+                      style={{
+                        height: 300,
+                        width: '100%',
+                      }}
+                      source={{
+                        uri: el.content.media && el.content.media.url,
+                      }}
+                    />
+                  </View>
+                )}
+                <View style={styles.actionPostContainer}>
+                  <View style={styles.actionPost}>
+                    <View style={styles.reactPost}>
+                      <TouchableOpacity
+                        activeOpacity={0.8}
+                        onPress={() => {
+                          if (reactStatus < 0) handleReactPost(el.id);
+                          else handleUnReactPost(el.id, reactStatus);
+                        }}
+                      >
+                        <Ionicons
+                          style={{
+                            fontSize: 25,
+                            color: reactStatus >= 0 ? 'red' : '#ccc',
+                            marginRight: 5,
+                          }}
+                          name={reactStatus >= 0 ? 'heart' : 'heart-outline'}
+                        />
+                      </TouchableOpacity>
+                      <Text style={{ fontSize: 20 }}>
+                        {(el.reacts && el.reacts.length) || 0}
+                      </Text>
+                    </View>
+
+                    <View style={styles.actionPost}>
+                      <TouchableOpacity
+                        activeOpacity={0.8}
+                        onPress={() => handleOpenComment(el.id)}
+                      >
+                        <Ionicons
+                          style={styles.commentIcon}
+                          name="chatbox-ellipses-outline"
+                        />
+                      </TouchableOpacity>
+                      <Text style={{ fontSize: 20 }}>{el.comments.length}</Text>
+                    </View>
                   </View>
                 </View>
               </View>
-            </View>
-          );
-        })}
+            );
+          })}
+        </ScrollView>
       </ScrollView>
       <RBSheet
         ref={refRBSheet}

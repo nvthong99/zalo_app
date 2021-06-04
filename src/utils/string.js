@@ -12,7 +12,8 @@ function changeAlias(alias) {
 }
 
 function validateEmail(email) {
-  const re = /^[^0-9][a-zA-Z0-9_]+([.][a-zA-Z0-9_]+)*[@][a-zA-Z0-9_]+([.][a-zA-Z0-9_]+)*[.][a-zA-Z]{2,4}$/;
+  const re =
+    /^[^0-9][a-zA-Z0-9_]+([.][a-zA-Z0-9_]+)*[@][a-zA-Z0-9_]+([.][a-zA-Z0-9_]+)*[.][a-zA-Z]{2,4}$/;
   return re.test(String(email).toLowerCase());
 }
 
@@ -21,4 +22,11 @@ function validatePassword(password) {
   return re.test(password);
 }
 
-export { changeAlias, validateEmail, validatePassword };
+function urlify(text) {
+  var urlRegex = /(https?:\/\/[^\s]+)/g;
+  return text.replace(urlRegex, function (url) {
+    return '<a href="' + url + '">' + url + '</a>';
+  });
+}
+
+export { changeAlias, validateEmail, validatePassword, urlify };

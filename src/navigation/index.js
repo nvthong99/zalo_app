@@ -48,9 +48,9 @@ const Navigators = () => {
 
   const verifyToken = async () => {
     const accessTokenFromCookie = await getCookie('accessToken');
-    console.log(accessTokenFromCookie);
+    console.log('fdsfsd1', accessToken);
     if (accessTokenFromCookie && accessTokenFromCookie !== 'undefined') {
-      console.log(accessTokenFromCookie);
+      console.log('fsdfsd2', accessTokenFromCookie);
       dispatch(actions.auth.verifyToken(accessTokenFromCookie));
     }
     setIsFirstTime(false);
@@ -73,8 +73,7 @@ const Navigators = () => {
     }
   }, [accessToken, user]);
 
-  console.log(verifying);
-  if (isFirstTime || verifying) {
+  if (isFirstTime || verifying || (accessToken && !socket)) {
     return <Text>Loading....</Text>;
   }
 

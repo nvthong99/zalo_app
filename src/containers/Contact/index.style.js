@@ -6,13 +6,13 @@ export default StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     paddingTop: 15,
-    paddingLeft: 15,
+    marginBottom: 10,
   },
   commenterAvatar: {
-    width: 50,
-    height: 50,
+    width: 30,
+    height: 30,
     borderRadius: 50,
-    marginRight: 20,
+    marginRight: 10,
   },
   commentContent: {
     display: 'flex',
@@ -21,7 +21,6 @@ export default StyleSheet.create({
   },
   commenterName: {
     fontSize: 15,
-    fontWeight: 'bold',
     color: '#000',
     marginRight: 10,
   },

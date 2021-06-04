@@ -43,7 +43,7 @@ const SearchFriend = ({ navigation }) => {
   };
 
   return (
-    <>
+    <View style={{ backgroundColor: '#fff' }}>
       <View
         style={{
           height: 25,
@@ -54,24 +54,27 @@ const SearchFriend = ({ navigation }) => {
         style={{
           display: 'flex',
           flexDirection: 'row',
+          alignItems: 'center',
           backgroundColor: '#53abfb',
           color: '#fff',
           padding: 15,
         }}
       >
-        <Ionicons
-          name="search-outline"
-          style={{
-            fontSize: 25,
-            color: '#fff',
-            marginRight: 20,
+        <TouchableOpacity
+          onPress={() => {
+            navigation.navigate('Message');
           }}
-        />
+        >
+          <Ionicons
+            name="arrow-back"
+            style={{ fontSize: 20, color: '#fff', marginRight: 10 }}
+          />
+        </TouchableOpacity>
         <TextInput
           style={{
             flexGrow: 1,
             color: '#fff',
-            fontSize: 18,
+            fontSize: 20,
           }}
           placeholderTextColor="#fff"
           editable
@@ -80,54 +83,70 @@ const SearchFriend = ({ navigation }) => {
         />
       </View>
 
-      <View>
+      <View style={{ padding: 10 }}>
         {!userSearch ? (
-          <Text>No result</Text>
+          <Text
+            style={{
+              fontSize: 15,
+              color: '#ccc',
+              textAlign: 'center',
+              marginTop: 10,
+            }}
+          >
+            No result
+          </Text>
         ) : (
           <ScrollView>
-            <TouchableOpacity
-              activeOpacity={0.8}
-              onPress={() => {
-                navigation.navigate('Personal', {
-                  userId: userSearch.friend.id,
-                });
+            <View
+              style={{
+                display: 'flex',
+                flexDirection: 'row',
               }}
             >
-              <Image
-                style={{
-                  width: 50,
-                  height: 50,
-                  borderRadius: 50,
-                  marginRight: 20,
+              <TouchableOpacity
+                activeOpacity={0.8}
+                onPress={() => {
+                  navigation.navigate('Personal', {
+                    userId: userSearch.friend.id,
+                  });
                 }}
-                source={{
-                  uri: userSearch.friend.avatar,
-                }}
-              />
-            </TouchableOpacity>
-            <View style={{ flexGrow: 1 }}>
-              <Text style={{ fontSize: 18, marginBottom: 5 }}>
-                {userSearch.friend.name}
-              </Text>
-            </View>
-            <View>
-              {userSearch.status === 'STRANGER' &&
-              userSearch.friend.id !== user.id ? (
-                <TouchableOpacity
-                  activeOpacity={0.8}
-                  onPress={handleRequestAddFriend(userSearch.friend.id)}
-                >
-                  <Text>Kết bạn</Text>
-                </TouchableOpacity>
-              ) : userSearch.status === 'REQUEST' &&
+              >
+                <Image
+                  style={{
+                    width: 30,
+                    height: 30,
+                    borderRadius: 50,
+                    marginRight: 20,
+                  }}
+                  source={{
+                    uri: userSearch.friend.avatar,
+                  }}
+                />
+              </TouchableOpacity>
+              <View style={{ flexGrow: 1 }}>
+                <Text style={{ fontSize: 18, marginBottom: 5 }}>
+                  {userSearch.friend.name}
+                </Text>
+              </View>
+              <View>
+                {userSearch.status === 'STRANGER' &&
                 userSearch.friend.id !== user.id ? (
-                <Text style={{ color: '#ccc' }}>Đang yêu cầu</Text>
-              ) : null}
+                  <TouchableOpacity
+                    activeOpacity={0.8}
+                    onPress={handleRequestAddFriend(userSearch.friend.id)}
+                  >
+                    <Text>Kết bạn</Text>
+                  </TouchableOpacity>
+                ) : userSearch.status === 'REQUEST' &&
+                  userSearch.friend.id !== user.id ? (
+                  <Text style={{ color: '#ccc' }}>Đang yêu cầu</Text>
+                ) : null}
+              </View>
             </View>
           </ScrollView>
         )}
       </View>
-    </>
+    </View>
   );
 };
 

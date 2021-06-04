@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { View, Text, Image, TouchableOpacity, ScrollView } from 'react-native';
 import apis from '../../apis';
 import styles from './index.style';
@@ -6,42 +6,46 @@ import Header from '../../components/Header';
 import { useSelector } from 'react-redux';
 
 const MessageApiScreen = ({ navigation }) => {
+  const ref = useRef();
   const [conversations, setConversations] = useState([]);
   const { user } = useSelector((state) => state.auth);
+  const { socket } = useSelector((state) => state.socket);
 
-  const fetchConversations = async () => {
-    const { data } = await apis.conversation.getAllConversationByMe();
-    if (data && data.status) {
-      const temp = data.result.data.map((el) => {
-        let isBlock = false;
-        let friend;
-        if (el.blockMessage.find((ele) => ele === user.id)) {
-          isBlock = true;
-        }
-        if (user.id === el.userA) {
-          friend = { ...el.userB };
-        } else {
-          friend = { ...el.userA };
-        }
-        return {
-          id: el.id,
-          messages: [...el.messages],
-          friend,
-          isBlock,
-        };
-      });
-      setConversations([...temp]);
-    }
+  const fetchConversations = async (data) => {
+    const temp = data.map((el) => {
+      let isBlock = false;
+      let friend;
+      if (el.blockMessage.find((ele) => ele.equals(user.id))) {
+        isBlock = true;
+      }
+
+      if (user.id === el.userB._id.toString()) {
+        friend = { ...el.userA, id: el.userA._id };
+      } else {
+        friend = { ...el.userB, id: el.userB._id };
+      }
+      return {
+        id: el._id,
+        messages: [...el.messages],
+        friend,
+        isBlock,
+      };
+    });
+    setConversations([...temp]);
   };
-
   useEffect(() => {
-    fetchConversations();
-  }, []);
+    if (socket) {
+      socket.emit('CLIENT_JOIN_CHAT');
+      ref.current = socket;
+      socket.on('SERVER_SEND_LIST_CONVERSATION', (data) => {
+        fetchConversations([...data]);
+      });
+    }
+  }, [socket]);
 
   return (
     <View>
-      <Header />
-      <Text>Message</Text>
+      <Header navigation={navigation} />
       <ScrollView>
         {conversations.map((el) => (
           <View style={styles.comment} key={el.id}>
@@ -61,6 +65,9 @@ const MessageApiScreen = ({ navigation }) => {
               <View>
                 <View style={styles.commentContent}>
                   <Text style={styles.commenterName}>{el.friend.name}</Text>
+                  <Text style={styles.msg}>
+                    {el.messages[el.messages.length - 1].message}
+                  </Text>
                 </View>
               </View>
             </TouchableOpacity>

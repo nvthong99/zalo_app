@@ -55,10 +55,28 @@ const ContactApiScreen = ({ navigation }) => {
   };
 
   return (
-    <View>
+    <View style={{ backgroundColor: '#fff' }}>
       <Header navigation={navigation} />
-      <View style={{ marginBottom: 20 }}>
-        <Text>Lời mời kết bạn</Text>
+      <View style={{ marginBottom: 20, padding: 10 }}>
+        <Text
+          style={{
+            fontWeight: 'bold',
+            fontSize: 15,
+            paddingTop: 10,
+            paddingBottom: 10,
+            borderBottomColor: '#ccc',
+            borderBottomWidth: 1,
+          }}
+        >
+          Lời mời kết bạn
+        </Text>
+        {requestFriends.length <= 0 ? (
+          <View>
+            <Text style={{ textAlign: 'center', color: '#ccc', fontSize: 15 }}>
+              Bạn hiện không có yêu cầu nào
+            </Text>
+          </View>
+        ) : null}
         <View>
           {requestFriends.map((el) => (
             <View style={styles.comment} key={el.id}>
@@ -100,8 +118,19 @@ const ContactApiScreen = ({ navigation }) => {
           ))}
         </View>
       </View>
-      <View>
-        <Text>Bạn bè</Text>
+      <View style={{ padding: 10 }}>
+        <Text
+          style={{
+            fontWeight: 'bold',
+            fontSize: 15,
+            paddingTop: 10,
+            paddingBottom: 10,
+            borderBottomColor: '#ccc',
+            borderBottomWidth: 1,
+          }}
+        >
+          Lời mời kết bạn
+        </Text>
         <View>
           {friends.map((el) => (
             <View style={styles.comment} key={el.id}>

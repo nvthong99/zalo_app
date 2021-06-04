@@ -1,3 +1,3 @@
 export default {
-  BACKEND_DOMAIN: 'http://964e12982332.ngrok.io',
+  BACKEND_DOMAIN: 'http://a5c1d9a6c277.ngrok.io',
 };
