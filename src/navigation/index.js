@@ -11,6 +11,9 @@ import AuthStackScreen from './AuthStackScreen';
 import PersonalScreen from '../containers/Personal';
 import SearchFriendScreen from '../containers/SearchFriend';
 
+import envConstants from '../constants/env';
+import io from 'socket.io-client';
+
 const PrivateStack = createStackNavigator();
 
 const PrivateScreenStack = () => {
@@ -38,12 +41,16 @@ const RootStack = createStackNavigator();
 
 const Navigators = () => {
   const dispatch = useDispatch();
-  const { accessToken, verifying } = useSelector((state) => state.auth);
+  const { accessToken, verifying, user } = useSelector((state) => state.auth);
+  const { socket } = useSelector((state) => state.socket);
+
   const [isFirstTime, setIsFirstTime] = useState(true);
 
   const verifyToken = async () => {
     const accessTokenFromCookie = await getCookie('accessToken');
-    if (accessTokenFromCookie) {
+    console.log(accessTokenFromCookie);
+    if (accessTokenFromCookie && accessTokenFromCookie !== 'undefined') {
+      console.log(accessTokenFromCookie);
       dispatch(actions.auth.verifyToken(accessTokenFromCookie));
     }
     setIsFirstTime(false);
@@ -57,6 +64,16 @@ const Navigators = () => {
     }
   }, []);
 
+  useEffect(() => {
+    if (!socket) {
+      if (accessToken && user) {
+        const socket = io(envConstants.BACKEND_DOMAIN + `?data=${user.id}`);
+        dispatch(actions.socket.updateSocket(socket));
+      }
+    }
+  }, [accessToken, user]);
+
+  console.log(verifying);
   if (isFirstTime || verifying) {
     return <Text>Loading....</Text>;
   }

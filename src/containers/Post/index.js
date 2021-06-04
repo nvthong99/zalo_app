@@ -31,7 +31,6 @@ const Diary = ({ navigation }) => {
   });
 
   const { user } = useSelector((state) => state.auth);
-  const { socket } = useSelector((state) => state.socket);
   const [posts, setPosts] = useState([]);
   const [listSeeMore, setListSeeMore] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
@@ -172,7 +171,7 @@ const Diary = ({ navigation }) => {
     <View style={{ backgroundColor: '#eee' }}>
       <Header navigation={navigation} />
       <ScrollView
-        style={{ marginBottom: 80 }}
+        style={{ marginVertical: 20 }}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
@@ -182,7 +181,7 @@ const Diary = ({ navigation }) => {
             <Image
               style={styles.avatar}
               source={{
-                uri: user.avatar,
+                uri: user && user.avatar,
               }}
             />
             <TouchableOpacity

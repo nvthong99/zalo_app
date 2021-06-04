@@ -39,11 +39,10 @@ export function verifyToken(accessToken) {
   };
 }
 
-export function verifyTokenSuccess(accessToken, role, user) {
+export function verifyTokenSuccess(accessToken, user) {
   return {
     type: actionTypes.VERIFY_TOKEN_SUCCESS,
     accessToken,
-    role,
     user,
   };
 }

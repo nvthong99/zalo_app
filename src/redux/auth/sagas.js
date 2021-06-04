@@ -5,14 +5,13 @@ import { setCookie } from '../../utils/cookie';
 import { responseCodes } from '../../enums';
 
 function* loginSaga({ phoneNumber, password }) {
-  let accessToken;
   try {
+    const A_WEEK = 7 * 24 * 60 * 60 * 1000;
     const { data } = yield api.auth.login(phoneNumber, password);
-
-    if (!data.status) {
+    if (!data || !data.status) {
       if (
-        data.code === responseCodes.USER_NOT_EXISTS ||
-        data.code === responseCodes.PASSWORD_NOT_MATCH
+        data.code === responseCodes.USER_NOT_FOUND ||
+        data.code === responseCodes.WRONG_PASSWORD
       ) {
         yield put(actions.auth.loginFailure(data.code));
       } else {
@@ -20,11 +19,14 @@ function* loginSaga({ phoneNumber, password }) {
       }
       return;
     }
-    ({ accessToken, user } = data.result);
-    yield setCookie('accessToken', accessToken, 1 * 24 * 60 * 60 * 1000);
-    yield put(
-      actions.auth.loginSuccess(accessToken, responseCodes.SUCCESS, user),
-    );
+
+    const { accessToken, user } = data.result;
+    if (user) {
+      yield setCookie('accessToken', accessToken, A_WEEK);
+      yield put(actions.auth.loginSuccess(accessToken, user));
+    } else {
+      yield put(actions.auth.loginFailure('Lỗi access token'));
+    }
   } catch (error) {
     yield put(actions.auth.loginFailure('Lỗi không xác định'));
   }
@@ -35,9 +37,8 @@ function* verifyTokenSaga({ accessToken }) {
     const { data } = yield api.auth.verify(accessToken);
     if (!data && !data.status) throw new Error();
     const { user } = data.result;
-    const role = null;
     if (user) {
-      yield put(actions.auth.verifyTokenSuccess(accessToken, role, user));
+      yield put(actions.auth.verifyTokenSuccess(accessToken, user));
     } else {
       yield put(actions.auth.verifyTokenFailure());
     }

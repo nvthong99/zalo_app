@@ -7,6 +7,7 @@ import { Text } from 'react-native';
 import PostScreen from '../containers/Post';
 import CreatePost from '../containers/Post/CreatePost';
 import MessageScreen from '../containers/Message';
+import ChatScreen from '../containers/Message/Chat';
 import ContactScreen from '../containers/Contact';
 import InformationScreen from '../containers/Information';
 import CallApiScreen from '../containers/CallApi';
@@ -33,6 +34,25 @@ const PostStackScreen = () => {
         component={CommentScreen}
       />
     </PostStack.Navigator>
+  );
+};
+
+const MessageStack = createStackNavigator();
+
+const MessageStackScreen = () => {
+  return (
+    <MessageStack.Navigator>
+      <MessageStack.Screen
+        name="Message"
+        options={{ headerShown: false }}
+        component={MessageScreen}
+      />
+      <MessageStack.Screen
+        name="Chat"
+        options={{ headerShown: false }}
+        component={ChatScreen}
+      />
+    </MessageStack.Navigator>
   );
 };
 
@@ -109,7 +129,7 @@ const HomeStackScreen = () => {
         inactiveTintColor: '#777777',
       }}
     >
-      <Tab.Screen name="Message" component={MessageScreen} />
+      <Tab.Screen name="Message" component={MessageStackScreen} />
       <Tab.Screen name="Contact" component={ContactScreen} />
       <Tab.Screen name="CallApi" component={CallApiScreen} />
       <Tab.Screen name="Post" component={PostStackScreen} />

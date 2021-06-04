@@ -10,8 +10,6 @@ import {
 import { useSelector } from 'react-redux';
 import apis from '../../../apis';
 import styles from './index.style';
-import io from 'socket.io-client';
-import envConstants from '../../../constants/env';
 import moment from 'moment';
 
 const Comment = ({ route }) => {
@@ -19,15 +17,14 @@ const Comment = ({ route }) => {
   const scrollViewRef = useRef();
   const { postId } = route.params;
   const { user } = useSelector((state) => state.auth);
+  const { socket } = useSelector((state) => state.socket);
   const [comments, setComments] = useState([]);
   const [text, setText] = useState('');
-  const [isLoading, setIsLoading] = useState(true);
 
   const fetchComments = async () => {
     const { data } = await apis.post.getAllCommentByPost(postId);
     if (data && data.status) {
       setComments(data.result.data);
-      setIsLoading(false);
     } else {
       alert('fetch data failed');
     }
@@ -39,18 +36,14 @@ const Comment = ({ route }) => {
 
   useEffect(() => {
     fetchComments();
-
-    const socket = io(envConstants.BACKEND_DOMAIN + `?data=${user.id}`);
-    ref.current = socket;
-    socket.emit('CLIENT_JOIN_COMMENT', { postId });
-    return () => socket.disconnect();
+    if (socket) {
+      ref.current = socket;
+      socket.emit('CLIENT_JOIN_COMMENT', { postId });
+    }
   }, []);
 
   useEffect(() => {
     ref.current.on('SERVER_SEND_COMMENT', handleAddComment);
-    ref.current.on('DISCONNECT', () => {
-      console.log('disconnected');
-    });
   });
 
   const handleSend = async () => {
@@ -61,6 +54,9 @@ const Comment = ({ route }) => {
     setText('');
   };
 
+  if (!user) {
+    return <Text>Loading...</Text>;
+  }
   return (
     <View style={{ flexDirection: 'column', flex: 1 }}>
       <View style={{ flex: 1 }}>
